@@ -69,7 +69,9 @@ class HandleApi extends Component {
     }
     
     render() { 
-        if(this.state.movies === null){
+
+        const {movies,moviesList,boxOffice,visible} = this.state
+        if(movies === null){
             return(<h3>No movies found</h3>);
         }
         else
@@ -77,7 +79,7 @@ class HandleApi extends Component {
             return( 
                 <div>
                 { 
-                    this.state.movies.map((movie) => (
+                    movies.map((movie) => (
                         <div style={this.style} id={movie.imdbID}>
                         <ul>
                         <img src={movie.Poster} width={128} alt="new"/>
@@ -92,12 +94,12 @@ class HandleApi extends Component {
                 }
                 <Modal
                   title="About"
-                  visible={this.state.visible}
+                  visible={visible}
                   onOk={this.handleOk}
                   onCancel={this.handleCancel}>
                       <ul>
-                            <span style={{backgroundColor: "DodgerBlue"}}>Box Office: {this.state.boxOffice}  </span>
-                          { Object.keys(this.state.moviesList).map((item)=> item !=="Ratings"? (<span>{this.state.moviesList[item]}</span>): null)}
+                            <span style={{backgroundColor: "DodgerBlue"}}>Box Office: {boxOffice}  </span>
+                          { Object.keys(moviesList).map((item)=> item !=="Ratings"? (<span>{moviesList[item]}</span>): null)}
                       </ul>
                 </Modal> 
               </div>
