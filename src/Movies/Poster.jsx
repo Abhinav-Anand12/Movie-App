@@ -6,9 +6,10 @@ class Poster extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            title: '',
-            year: '',
+            title: props.title,
+            year: props.year,
             isLoaded: false,
+            onSearch:props.onSearch
         };
     
     }
@@ -16,6 +17,9 @@ class Poster extends Component {
     handleSubmit=(event) => {
             this.setState({isLoaded: true})
             event.preventDefault();
+            if(this.state.onSearch){
+                window.location.reload(false)
+            }
     }
     
     handleOnChange = event => {       

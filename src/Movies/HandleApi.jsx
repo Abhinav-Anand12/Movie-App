@@ -9,8 +9,8 @@ class HandleApi extends Component {
             year: props.year,
             movies: [],
             curMovieId:null,
-            moviesList: {},
             visible: false,
+            moviesList: {},
             boxOffice: ''
         };
     }
@@ -18,6 +18,8 @@ class HandleApi extends Component {
     showModal = (event) => {  
         this.setState({
             visible: false,
+
+            
             curMovieId: event.target.id
           });
           setTimeout(() => {
@@ -56,40 +58,51 @@ class HandleApi extends Component {
         const uri ="http://www.omdbapi.com/?apikey=e1075083";
         const url=`${uri}&s=${this.state.title}&y=${this.state.year}`; 
         fetch(url).then(res => res.json())
-        .then(movie => {this.setState({
-            movies: Object.values(movie.Search) 
-        })})         
+        .then(movie => {
+            console.log("movie" + movie + "movie.Search" + movie.Search)         
+            typeof(movie.Search) !== 'undefined'?  
+            this.setState({
+             movies: Object.values(movie.Search) 
+        }) :
+        this.setState({movies: null})
+    })         
     }
     
     render() { 
-        return(
-        <div>
-        { 
-            this.state.movies.map((movie) => (
-                <div style={this.style} id={movie.imdbID}>
-                <ul>
-                <img src={movie.Poster} width={300} height={100} mode='fit'alt="new"/>
-                    <span >{movie.Title} </span><br/>
-                    <span> Year {movie.Year}  </span>
-                    <span>Imdb Id: {movie.imdbID}  </span>
-                    <span>Type: {movie.Type}  </span>  
-                    <button id={movie.imdbID} type="button" onClick={this.showModal}>More Info</button>                      
-                </ul>                       
-                </div>      
-            ))    
+        if(this.state.movies === null){
+            return(<h3>No movies found</h3>);
         }
-        <Modal
-          title="About"
-          visible={this.state.visible}
-          onOk={this.handleOk}
-          onCancel={this.handleCancel}>
-              <ul>
-                    <span style={{backgroundColor: "DodgerBlue"}}>Box Office: {this.state.boxOffice}  </span>
-                  { Object.keys(this.state.moviesList).map((item)=> item !=="Ratings"? (<span>{this.state.moviesList[item]}</span>): null)}
-              </ul>
-        </Modal> 
-      </div>
-    );
+        else
+        {
+            return( 
+                <div>
+                { 
+                    this.state.movies.map((movie) => (
+                        <div style={this.style} id={movie.imdbID}>
+                        <ul>
+                        <img src={movie.Poster} width={128} alt="new"/>
+                            <span >{movie.Title} </span><br/>
+                            <span> Year {movie.Year}  </span>
+                            <span>Imdb Id: {movie.imdbID}  </span>
+                            <span>Type: {movie.Type}  </span>  
+                            <button id={movie.imdbID} type="button" onClick={this.showModal}>More Info</button>                      
+                        </ul>                       
+                        </div>      
+                    ))    
+                }
+                <Modal
+                  title="About"
+                  visible={this.state.visible}
+                  onOk={this.handleOk}
+                  onCancel={this.handleCancel}>
+                      <ul>
+                            <span style={{backgroundColor: "DodgerBlue"}}>Box Office: {this.state.boxOffice}  </span>
+                          { Object.keys(this.state.moviesList).map((item)=> item !=="Ratings"? (<span>{this.state.moviesList[item]}</span>): null)}
+                      </ul>
+                </Modal> 
+              </div>
+            );
+        }
   }
 
 }

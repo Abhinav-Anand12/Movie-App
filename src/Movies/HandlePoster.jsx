@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import ReactPaginate from 'react-paginate';
+import { Pagination } from "antd"
+import Poster from './Poster';
 
 class HandlePoster extends Component {
 
@@ -12,71 +13,74 @@ class HandlePoster extends Component {
             offset: 0,
             elements: [],
             perPage: 10,
-            currentPage: 0,
+            currentPage: 1,
+            allMovies: [],
+            maxPageNo:null,
+            pageCount:null,
+            isLoaded: false,
+            page: 1
         };
     }
-
     style ={
         color: "black",
         bold:true,
-        backgroundColor: "DodgerBlue"
     }
 
-    setElementsForCurrentPage() {
-        let elements = this.state.movies
-                      .slice(this.state.offset, this.state.offset + this.state.perPage)
-                      .map(post =>
-          ( <img src="{post.thumburl}" alt="new"/>)
-        );
-        this.setState({ elements: elements });
-      }
+    handlePageChange = (page) => {
+      this.setState({ page, loading: true },this.fetchMovies);
+    }; 
 
-    handlePageClick = (data) => {
-        const selectedPage = data.selected;
-        const offset = selectedPage * this.state.perPage;
-        this.setState({ currentPage: selectedPage, offset: offset }, () => {
-          this.setElementsForCurrentPage();
-        });
-      }
+    handleTitleChange = (e) => {
+      this.setState({ title: e.target.value });
+    };
+  
+    handleYearChange = (year) => {
+      this.setState({ year });
+    };
+
+
+    fetchMovies = async () => {
+      const uri ="http://www.omdbapi.com/?apikey=e1075083";
+      const url=`${uri}&s=${this.state.title}&y=${this.state.year}&type=movie`; 
+      await fetch(url).then(res => res.json()).then(movie => {this.setState({ maxPageNo: Math.ceil(parseInt(movie.totalResults) / this.state.perPage)})})
+
+      const url2=`${uri}&s=${this.state.title}&y=${this.state.year}&page=${this.state.page}&type=movie`; 
+      await fetch(url2).then(res => res.json())
+      .then(movie => {this.setState({
+          movies: movie.Search,
+        })})
+    };
 
     componentDidMount(){
-        const uri ="http://www.omdbapi.com/?apikey=e1075083";
-        const url=`${uri}&s=${this.state.title}&y=${this.state.year}`; 
-        fetch(url).then(res => res.json())
-        .then(movie => {this.setState({
-            movies: Object.values(movie.Search),
-            pageCount: Math.ceil(this.state.movies.length / this.state.perPage)
-          }, () => this.setElementsForCurrentPage())     
-          console.log(this.state.movies.length);
-           })         
+      console.log("Component didd mount");
+      const uri ="http://www.omdbapi.com/?apikey=e1075083";
+      const url=`${uri}&s=${this.state.title}&y=${this.state.year}&type=movie`; 
+      fetch(url).then(res => res.json()).then(movie => {this.setState({ maxPageNo: Math.ceil(parseInt(movie.totalResults) / this.state.perPage)})})
     }
-    
+
     render() { 
-        let paginationElement;
-        if (this.state.pageCount > 1) {
-          paginationElement = (
-            <ReactPaginate
-              previousLabel={"← Previous"}
-              nextLabel={"Next →"}
-              breakLabel={<span className="gap">...</span>}
-              pageCount={this.state.pageCount}
-              onPageChange={this.handlePageClick}
-              forcePage={this.state.currentPage}
-              containerClassName={"pagination"}
-              previousLinkClassName={"previous_page"}
-              nextLinkClassName={"next_page"}
-              disabledClassName={"disabled"}
-              activeClassName={"active"}
+      const {movies, title, year , maxPageNo} = this.state
+
+      const search = (
+        <Poster title={title} year={year} onSearch={true} />
+      );    
+            const totalResults = maxPageNo*10;
+            const pagination = totalResults ? (
+            <Pagination
+              defaultCurrent={0}
+              total={totalResults}
+              onChange={this.handlePageChange}
+              showSizeChanger={false}
             />
-          );
-          }
-            return ( <div>
-                {paginationElement}
-                { 
-                    this.state.movies.map((movie) => (
+          ) : ("");
+
+            return ( <div> 
+                {search}
+                {   
+                    movies.map((movie) => (
                     <div style={this.style} id={movie.imdbID}>
                     <ul>
-                    <img src={movie.Poster} width={300} height={100} mode='fit'alt="new"/>
+                    <img src={movie.Poster} width={128} alt="new"/>
                         <span >{movie.Title} </span><br/>
                         <span> Year {movie.Year}  </span>
                         <span>Imdb Id: {movie.imdbID}  </span>
@@ -85,7 +89,7 @@ class HandlePoster extends Component {
                     </div>       
                     ))         
                 }
-                {paginationElement}
+                {pagination}
                     </div> );
             }
 }
